@@ -14,7 +14,7 @@ namespace Play.Catalog.Service.Repositories
         public ItemsRepository()
         {
             var mongoDbClient = new MongoClient("mongodb://localhost:27017");
-
+            //create a docker container for mongo db //=====>  docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo 
             var database = mongoDbClient.GetDatabase("Catalog");
             dbCollection = database.GetCollection<Item>(CollectionName);
         }
