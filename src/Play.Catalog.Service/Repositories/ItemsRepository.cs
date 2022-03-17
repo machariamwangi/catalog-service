@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace Play.Catalog.Service.Repositories
 {
-    public class ItemsRepository
+    public class ItemsRepository : IItemsRepository
     {
         public const string CollectionName = "Items";
         private readonly IMongoCollection<Item> dbCollection;
         private readonly FilterDefinitionBuilder<Item> filterBuilder = Builders<Item>.Filter;
-        public ItemsRepository()
+        public ItemsRepository(IMongoDatabase mongoDatabase)
         {
-            var mongoDbClient = new MongoClient("mongodb://localhost:27017");
-            //create a docker container for mongo db //=====>  docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo 
-            var database = mongoDbClient.GetDatabase("Catalog");
-            dbCollection = database.GetCollection<Item>(CollectionName);
+            //var mongoDbClient = new MongoClient("mongodb://localhost:27017");
+            ////create a docker container for mongo db //=====>  docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo 
+            //var database = mongoDbClient.GetDatabase("Catalog");
+            dbCollection = mongoDatabase.GetCollection<Item>(CollectionName);
         }
 
-        public async  Task<IReadOnlyCollection<Item>> GetAllAsync()
+        public async Task<IReadOnlyCollection<Item>> GetAllAsync()
         {
             return await dbCollection.Find(filterBuilder.Empty).ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace Play.Catalog.Service.Repositories
 
         public async Task CreateAsync(Item entity)
         {
-            if(entity == null)
+            if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
@@ -41,7 +41,7 @@ namespace Play.Catalog.Service.Repositories
 
         public async Task UpdateAsync(Item entity)
         {
-            if(entity == null)
+            if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
@@ -53,7 +53,7 @@ namespace Play.Catalog.Service.Repositories
 
         public async Task RemoveAsync(Guid id)
         {
-             FilterDefinition<Item> filter = filterBuilder.Eq(x => x.Id, id);
+            FilterDefinition<Item> filter = filterBuilder.Eq(x => x.Id, id);
             await dbCollection.DeleteOneAsync(filter);
         }
     }
