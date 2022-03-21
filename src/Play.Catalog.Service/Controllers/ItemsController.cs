@@ -14,8 +14,8 @@ namespace Name.Catalog.Service.Controller
     [Route("items")]
     public class ItemsController : ControllerBase
     {
-        private readonly IItemsRepository itemsRepository;
-        public ItemsController(IItemsRepository itemsRepository)
+        private readonly IRepository<Item> itemsRepository;
+        public ItemsController(IRepository<Item> itemsRepository)
         {
             this.itemsRepository = itemsRepository;
         }

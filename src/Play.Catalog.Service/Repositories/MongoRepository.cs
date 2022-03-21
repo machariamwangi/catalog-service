@@ -6,31 +6,31 @@ using System.Threading.Tasks;
 
 namespace Play.Catalog.Service.Repositories
 {
-    public class ItemsRepository : IItemsRepository
+    public class MongoRepository<T> : IRepository<T> where T: IEntity
     {
-        public const string CollectionName = "Items";
-        private readonly IMongoCollection<Item> dbCollection;
-        private readonly FilterDefinitionBuilder<Item> filterBuilder = Builders<Item>.Filter;
-        public ItemsRepository(IMongoDatabase mongoDatabase)
+      //  public const string CollectionName = "Items";
+        private readonly IMongoCollection<T> dbCollection;
+        private readonly FilterDefinitionBuilder<T> filterBuilder = Builders<T>.Filter;
+        public MongoRepository(IMongoDatabase mongoDatabase, string CollectionName)
         {
             //var mongoDbClient = new MongoClient("mongodb://localhost:27017");
             ////create a docker container for mongo db //=====>  docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo 
             //var database = mongoDbClient.GetDatabase("Catalog");
-            dbCollection = mongoDatabase.GetCollection<Item>(CollectionName);
+            dbCollection = mongoDatabase.GetCollection<T>(CollectionName);
         }
 
-        public async Task<IReadOnlyCollection<Item>> GetAllAsync()
+        public async Task<IReadOnlyCollection<T>> GetAllAsync()
         {
             return await dbCollection.Find(filterBuilder.Empty).ToListAsync();
         }
 
-        public async Task<Item> GetAsync(Guid id)
+        public async Task<T> GetAsync(Guid id)
         {
-            FilterDefinition<Item> filter = filterBuilder.Eq(e => e.Id, id);
+            FilterDefinition<T> filter = filterBuilder.Eq(e => e.Id, id);
             return await dbCollection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public async Task CreateAsync(Item entity)
+        public async Task CreateAsync(T entity)
         {
             if (entity == null)
             {
@@ -39,21 +39,21 @@ namespace Play.Catalog.Service.Repositories
             await dbCollection.InsertOneAsync(entity);
         }
 
-        public async Task UpdateAsync(Item entity)
+        public async Task UpdateAsync(T entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            FilterDefinition<Item> filter = filterBuilder.Eq(x => x.Id, entity.Id);
+            FilterDefinition<T> filter = filterBuilder.Eq(x => x.Id, entity.Id);
 
             await dbCollection.ReplaceOneAsync(filter, entity);
         }
 
         public async Task RemoveAsync(Guid id)
         {
-            FilterDefinition<Item> filter = filterBuilder.Eq(x => x.Id, id);
+            FilterDefinition<T> filter = filterBuilder.Eq(x => x.Id, id);
             await dbCollection.DeleteOneAsync(filter);
         }
     }
